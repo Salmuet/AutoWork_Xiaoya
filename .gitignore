@@ -1,0 +1,8 @@
+*.ini
+
+AutoWork_Xiaoya.exe
+AutoWork_Xiaoya.spec
+Pipfile
+Pipfile.lock
+build/
+__pycache__/
