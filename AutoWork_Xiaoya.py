@@ -59,7 +59,7 @@ print('初始化完成!\n\n')
 
 try:
     co = ChromiumOptions(ini_path='.\\configs.ini')
-    co.mute(False)
+    co.mute(True)
     co.set_argument('--no-first-run')
     page = ChromiumPage(addr_driver_opts=co)
     sleep(0.5)
@@ -118,32 +118,44 @@ try:
     table = page.ele('.xy-modal-content-warp')
     mission = table.eles('tag:sup@@class^ant-scroll-number')
 
-    day = dt.now().day
+    now = dt.now()
     row = ''
     dayList = []
+    try:
+        for i in mission:
+            target = i.prev('.^rc')
+            target.click()
+            selectDay = target.parent('tag:td@@role=gridcell').attr('title')
 
-    for i in mission:
-        target = i.prev('.^rc')
-        target.click()
-        selectDay = target.child().text
+            # 排除过期任务
+            if dt.strptime(selectDay, r'%Y年%m月%d日') < now:
+                sleep(0.1)
+                continue
 
-        # 排除过期任务
-        if int(selectDay) < day:
-            sleep(0.1)
-            continue
+            sleep(0.3)
 
-        # 同周跳过
-        temp = i.parent('tag:tr@@role=row').child().attr('title')
-        if temp == row:
-            continue
-        else:
-            row = temp
+            # 同周跳过
+            temp = i.parent('tag:tr@@role=row').child().attr('title')
+            if temp == row:
+                continue
+            else:
+                row = temp
 
+            dayList.append(selectDay)
+    except ElementNotFoundError:
+        selectDay = table.ele('tag:tr@@class=rc-calendar-active-week').child().attr('title')
         dayList.append(selectDay)
+
+
+    page.ele('tag:i@@class$icon-close-circle-black').click()
+    sleep(0.5)
+    page.ele('@@class=circle@@title^点击查看').click()
+    sleep(1)
 
     while len(dayList) != 0:
         td = dayList[0]
-        table.ele(f'@@text()={td}@@class^rc-calendar').click()
+        table = page.ele('.xy-modal-content-warp')
+        table.ele(f'tag:td@@title={td}@@class^rc-calendar').click()
         sleep(0.5)
         WorkList = table.ele('.ant-row')
         NoWork = True
@@ -151,7 +163,7 @@ try:
             tarTime = dt.strptime(c.ele('.xy_taskCard_bottom').text, r'%Y-%m-%d %H:%M')
             title = c.ele('.group-resource-link').text
             type = title.split('.')[-1]
-            if tarTime < dt.now():
+            if tarTime < now:
                 continue
             elif type not in TARLIST:
                 continue
@@ -192,7 +204,6 @@ try:
                 sleep(1)
                 page.ele('@@class=circle@@title^点击查看').click()
                 sleep(1)
-                table = page.ele('.xy-modal-content-warp')
                 break
 
         if NoWork:
