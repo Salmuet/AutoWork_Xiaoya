@@ -1,8 +1,8 @@
 # AutoWork_Xiaoya 
 
-小雅文档类自动刷课程序
+小雅文档类自动刷课程序（WHUT登录）
 
-可以实现对于[`小雅`](https://ccnu.ai-augmented.com/app/jx-web/)平台的`mp4`、`pdf`、`ppt`、`pptx`类型的任务完成自动化刷课任务，自动完成当月所有任务，旨在减少不必要的机械性重复操作。
+可以实现对于[`小雅`](https://ccnu.ai-augmented.com/app/jx-web/)平台的`mp4`、`pdf`、`ppt`、`pptx`类型的任务完成自动化刷课任务，自动完成当月所有任务，旨在减少不必要的机械性重复操作。只进行了WHUT的登录界面适配，有需要的可以自取源代码修改。
 
 - 实现：`Python 3.9.6 + pwinput + DrissionPage 4.0.0b20`
 - 运行环境：`Windows`
