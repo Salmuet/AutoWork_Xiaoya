@@ -4,6 +4,8 @@ from datetime import datetime as dt
 from time import sleep
 from os import system
 
+UPDATE = '2023-12-31'
+
 with open('setInfo.ini', 'r') as f:
     RATE = f.readline()[7:-1].strip()
     ID = f.readline()[5:-1].strip()
@@ -22,7 +24,7 @@ print('可以在 setInfo.ini 文件中修改 [播放倍速] [登录ID] [登录�
 print('也可以不进行设置后续在命令行中根据提示输入(更为安全)')
 print('--------------------------------------------------')
 print('@Author  : Salnewt')
-print('@Latest  : 2023-12-15')
+print('@Latest  : '+UPDATE)
 print('\n')
 
 # 播放倍速
@@ -56,6 +58,12 @@ print(f'目前支持的处理类型 >>> {TARLIST}\n')
 print('任务过程中可通过 关闭网页 来结束任务\n')
 print('--------------------------------------------------\n\n')
 print('初始化完成!\n\n')
+
+past = input('是否尝试处理任务？(y/N)').strip()
+if past.lower() == 'y' or past.lower() == 'yes':
+    past = True
+else:
+    past = False
 
 try:
     co = ChromiumOptions(ini_path='.\\configs.ini')
@@ -128,9 +136,10 @@ try:
             selectDay = target.parent('tag:td@@role=gridcell').attr('title')
 
             # 排除过期任务
-            if dt.strptime(selectDay, r'%Y年%m月%d日') < now:
-                sleep(0.1)
-                continue
+            if past == False:
+                if dt.strptime(selectDay, r'%Y年%m月%d日') < now:
+                    sleep(0.1)
+                    continue
 
             sleep(0.3)
 
@@ -151,6 +160,7 @@ try:
     sleep(0.5)
     page.ele('@@class=circle@@title^点击查看').click()
     sleep(1)
+    pastMission = []
 
     while len(dayList) != 0:
         td = dayList[0]
@@ -163,11 +173,16 @@ try:
             tarTime = dt.strptime(c.ele('.xy_taskCard_bottom').text, r'%Y-%m-%d %H:%M')
             title = c.ele('.group-resource-link').text
             type = title.split('.')[-1]
-            if tarTime < now:
+            if tarTime < now and past == False:
                 continue
             elif type not in TARLIST:
                 continue
             else:
+                if past == True:
+                    if title not in pastMission:
+                        pastMission.append(title)
+                    else:
+                        continue
                 NoWork = False
                 print(f'当前任务: {tarTime} >> {title}')
                 c.ele('.group-resource-link').click()
@@ -199,6 +214,15 @@ try:
                 
                 page.ele('.btn_content').click()
                 print('\n任务结束\n')
+                sleep(1)
+                # 补交任务处理
+                try:
+                    endbtn = page.ele('tag:div@@role=document@@class^ant-modal', timeout=0.5).ele('tag:button@@type=button@@class^ant-btn', timeout=0.5)
+                    if endbtn.states.is_displayed:
+                        endbtn.click()
+                        sleep(0.5)
+                except ElementNotFoundError:
+                    pass                
                 page.back()
                 page.wait.load_start()
                 sleep(1)
