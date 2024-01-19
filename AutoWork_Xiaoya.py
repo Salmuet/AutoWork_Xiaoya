@@ -59,7 +59,7 @@ print('任务过程中可通过 关闭网页 来结束任务\n')
 print('--------------------------------------------------\n\n')
 print('初始化完成!\n\n')
 
-past = input('是否尝试处理任务？(y/N)').strip()
+past = input('是否处理`过期`任务？(y/N)').strip()
 if past.lower() == 'y' or past.lower() == 'yes':
     past = True
 else:
@@ -78,6 +78,7 @@ except FileNotFoundError:
     print('将[chrome_options] -> binary_location 设置为您的chrome或edge浏览器')
     print('\n例如Edge浏览器可能的部分设置: \n')
     print('[chromium_options]\naddress = 127.0.0.1:9222\nbrowser_path = C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe')
+    print('\n!!推荐优先使用Chrome!!')
     print('--------------------------------------------------------------------------------')
     print('')
     system('pause')
@@ -117,6 +118,16 @@ try:
             print('账号或密码错误，请在浏览器中手动输入')
             page.wait.load_start(timeout=60)
     except Exception:
+        pass
+
+    try:
+        loginAlert = page.ele('.llb-account-safe-modal', timeout=2.5)
+        sleep(0.2)
+        if loginAlert.states.is_displayed:
+            loginAlert.ele('@@class=btn-cancel@@text():继续登录').click()
+            page.wait.load_start()
+            sleep(0.5)
+    except ElementNotFoundError:
         pass
 
     page.ele('.aia_course_home_count_panel', timeout=10)
@@ -222,7 +233,7 @@ try:
                         endbtn.click()
                         sleep(0.5)
                 except ElementNotFoundError:
-                    pass                
+                    pass
                 page.back()
                 page.wait.load_start()
                 sleep(1)
@@ -238,7 +249,8 @@ try:
 except (KeyboardInterrupt, Exception) as e:
     print('')
     print('浏览器工作结束')
-    print('若非预期的结束工作，可能由于浏览器初始化弹窗造成，重启解决')
+    print('若非预期的结束工作，可能由于浏览器初始化弹窗造成，关闭弹窗后重启解决')
+    print('若问题仍旧无法解决，可能由于浏览器版本问题，请考虑下载 Chrome 浏览器')
 finally:
     print('')
     system('pause')
