@@ -87,7 +87,7 @@ except FileNotFoundError:
 try:
     page.set.window.max()
 
-    page.get('https://ccnu.ai-augmented.com/app/jw-common/user/login')
+    page.get('https://whut.ai-augmented.com/user/login')
     page.ele('.^ant-card')
 
     try:
@@ -98,10 +98,10 @@ try:
 
     page.ele('tx:统一').click()
     sleep(0.2)
-    page.ele('.ant-select-selection-search').click()
-    sleep(0.5)
-    page.ele('@@class=ant-select-item-option-content@@text():武汉理工大学').click()
-    sleep(0.2)
+    # page.ele('.ant-select-selection-search').click()
+    # sleep(0.5)
+    # page.ele('@@class=ant-select-item-option-content@@text():武汉理工大学').click()
+    # sleep(0.2)
     page.ele('.btn-approve').click()
 
     try:
@@ -134,7 +134,7 @@ try:
     sleep(0.5)
     page.ele('@@class=circle@@title^点击查看').click()
     sleep(1)
-    table = page.ele('.xy-modal-content-warp')
+    table = page.ele('.ta_content')
     mission = table.eles('tag:sup@@class^ant-scroll-number')
 
     now = dt.now()
@@ -167,15 +167,14 @@ try:
         dayList.append(selectDay)
 
 
-    page.ele('tag:i@@class$icon-close-circle-black').click()
-    sleep(0.5)
+    page.actions.key_down('ESCAPE')
     page.ele('@@class=circle@@title^点击查看').click()
     sleep(1)
     pastMission = []
 
     while len(dayList) != 0:
         td = dayList[0]
-        table = page.ele('.xy-modal-content-warp')
+        table = page.ele('.ta_content')
         table.ele(f'tag:td@@title={td}@@class^rc-calendar').click()
         sleep(0.5)
         WorkList = table.ele('.ant-row')
@@ -183,10 +182,10 @@ try:
         for c in WorkList.children():
             tarTime = dt.strptime(c.ele('.xy_taskCard_bottom').text, r'%Y-%m-%d %H:%M')
             title = c.ele('.group-resource-link').text
-            type = title.split('.')[-1]
+            misType = title.split('.')[-1]
             if tarTime < now and past == False:
                 continue
-            elif type not in TARLIST:
+            elif misType not in TARLIST:
                 continue
             else:
                 if past == True:
@@ -199,10 +198,10 @@ try:
                 c.ele('.group-resource-link').click()
                 page.wait.load_start()
 
-                if type == 'mp4':
+                if misType == 'mp4':
                     player = page.ele('.prism-player')
-                    page.wait.ele_display(player.ele('.^prism-big-play-btn'))
-                    sleep(0.5)
+                    while not page.wait.ele_displayed(player.ele('.^prism-big-play-btn')):
+                        sleep(0.5)
                     btn = player.ele('.^prism-big-play-btn')
                     btn.click()
                     sleep(0.5)
@@ -218,8 +217,16 @@ try:
                             record = process
                         if process == '100':
                             break
-                        if btn.states.is_displayed:
+                        if btn.style('display') == 'block':
                             btn.click()
+                elif misType == 'ppt' or misType == 'pptx':
+                    print('任务要求等待 2min')
+                    count = 0
+                    while count <= 120:
+                        print(f'\r                                        ', end='')
+                        print(f'\r执行进度: {count//120*100:.1f}%', end='')
+                        sleep(1)
+                        count += 1
                 
                 sleep(1)
                 
